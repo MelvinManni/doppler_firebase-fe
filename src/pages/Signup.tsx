@@ -24,7 +24,8 @@ export function Signup() {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
     setLoading(true);
     signUpUser(state, {
       cb: () => {
@@ -69,7 +70,7 @@ export function Signup() {
 
               <Form.Group className="mb-3" controlId="formBasicPassword">
                 <Form.Label>Password</Form.Label>
-                <Form.Control required min={6} onChange={handleChange} value={state?.password} name="password" type="password" placeholder="Password" />
+                <Form.Control required minLength={6} onChange={handleChange} value={state?.password} name="password" type="password" placeholder="Password" />
               </Form.Group>
 
               <Button className="w-100 btn-lg mt-4" variant="primary" type="submit">

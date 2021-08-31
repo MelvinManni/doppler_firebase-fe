@@ -10,6 +10,7 @@ export interface signUpData {
 export interface userInterface {
   firstName: string;
   lastName: string;
+  email: string;
 }
 
 export interface callbackInterface {
@@ -26,3 +27,21 @@ export interface authContextInterface {
   logOutUser: () => void;
 }
 
+export interface ipDataInterface {
+  ip_address: string;
+  city: string;
+  country: string;
+  continent: string;
+  longitude: number;
+  latitude: number;
+  region: string;
+  security: {
+    is_vpn: boolean;
+  };
+  timezone: {
+    name: string;
+    abbreviation: string;
+    gmt_offset: number;
+    current_time: string;
+  };
+}

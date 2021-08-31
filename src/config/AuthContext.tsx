@@ -1,6 +1,6 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "@firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "@firebase/auth";
 import { doc, DocumentData, getDoc, setDoc } from "@firebase/firestore";
-import React, { createContext } from "react";
+import React, { createContext, useEffect } from "react";
 import { authContextInterface, signUpData, userInterface, callbackInterface } from "../types";
 import { auth, db } from "./firebase";
 
@@ -13,6 +13,7 @@ const contextDefaultValues: authContextInterface = {
   currentUser: {
     firstName: "",
     lastName: "",
+    email: "",
   },
 };
 
@@ -28,12 +29,12 @@ export const AuthContextProvider = (props: {
   const logInUser = (email: string, password: string, callback?: callbackInterface) => {
     const cb = callback && callback.cb;
     const err = callback && callback.err;
-    setLoading(true);
+
     signInWithEmailAndPassword(auth, email, password)
       .then((res) => {
         setLoggedIn(true);
         getDoc(doc(db, "users", res.user.uid)).then(({ data }) => {
-          setCurrentUser(data as userInterface | DocumentData);
+          setCurrentUser({ ...data, email } as userInterface | DocumentData);
           cb && cb();
         });
       })
@@ -41,9 +42,6 @@ export const AuthContextProvider = (props: {
         setLoggedIn(false);
         alert(e.message);
         err && err();
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
@@ -67,9 +65,8 @@ export const AuthContextProvider = (props: {
         setDoc(doc(db, "users", res.user.uid), {
           firstName: data.firstName,
           lastName: data.lastName,
-        }).then(() => {
-          logInUser(data.email, data.password, { cb });
         });
+        cb && cb();
       })
       .then(() => {})
       .catch((e) => {
@@ -78,6 +75,30 @@ export const AuthContextProvider = (props: {
       })
       .finally(() => {});
   };
+
+  useEffect(() => {
+    setLoading(true);
+    onAuthStateChanged(auth, (user) => {
+      if (user === null) {
+        if (window.location.pathname === "/") {
+          setCurrentUser(undefined);
+          setLoggedIn(false);
+          setLoading(false);
+          window.location.replace("/login");
+        }
+      } else {
+        if (window.location.pathname !== "/") {
+          setLoggedIn(true);
+          getDoc(doc(db, "users", user.uid)).then((res) => {
+            const data = res.data();
+            setCurrentUser({ ...data, email: user.email } as userInterface | DocumentData);
+            window.location.replace("/");
+          });
+        }
+      }
+    });
+    // eslint-disable-next-line
+  }, []);
 
   return <AuthContext.Provider value={{ loading, isLoggedIn, currentUser, logInUser, logOutUser, signUpUser }}>{props.children}</AuthContext.Provider>;
 };
