@@ -49,7 +49,7 @@ export function Home() {
         <h4 className="text-center text-info my-3">Welcome {currentUser?.firstName}</h4>
         <Row className="justify-content-center mb-5">
           <Button onClick={logOutUser} variant="danger" style={{ width: "max-content" }}>
-            LogOut
+            Log Out
           </Button>
         </Row>
 
