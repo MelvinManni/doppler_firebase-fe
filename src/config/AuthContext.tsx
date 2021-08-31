@@ -80,21 +80,21 @@ export const AuthContextProvider = (props: {
     setLoading(true);
     onAuthStateChanged(auth, (user) => {
       if (user === null) {
+        setCurrentUser(undefined);
+        setLoggedIn(false);
+        setLoading(false);
         if (window.location.pathname === "/") {
-          setCurrentUser(undefined);
-          setLoggedIn(false);
-          setLoading(false);
           window.location.replace("/login");
         }
       } else {
-        if (window.location.pathname !== "/") {
-          setLoggedIn(true);
-          getDoc(doc(db, "users", user.uid)).then((res) => {
-            const data = res.data();
-            setCurrentUser({ ...data, email: user.email } as userInterface | DocumentData);
+        setLoggedIn(true);
+        getDoc(doc(db, "users", user.uid)).then((res) => {
+          const data = res.data();
+          setCurrentUser({ ...data, email: user.email } as userInterface | DocumentData);
+          if (window.location.pathname !== "/") {
             window.location.replace("/");
-          });
-        }
+          }
+        });
       }
     });
     // eslint-disable-next-line
